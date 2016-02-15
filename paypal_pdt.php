@@ -1,52 +1,76 @@
 <?php
 
-// $tx -> transaction id
-// $tkn -> token
-function pdt($tx,$tkn)
+/**
+ * Processes a PDT transaction id.
+ * @param $tx         The transaction ID.
+ * @param $token      The merchant's token.
+ * @return            The payment data if $tx was valid; otherwise FALSE.
+ */
+ 
+function process_pdt($tx, $token)
 {
-        // start curl
-        $curlRequest = curl_init();
-        // set curl options
+        // Init cURL
+        $request = curl_init();
+
+        // Set request options
         curl_setopt_array($request, array
         (
-                // https://www.sandbox.paypal.com/cgi-bin/webscr if testing
                 CURLOPT_URL => 'https://www.paypal.com/cgi-bin/webscr',
                 CURLOPT_POST => TRUE,
                 CURLOPT_POSTFIELDS => http_build_query(array
                 (
                         'cmd' => '_notify-synch',
                         'tx' => $tx,
-                        'at' => $tkn,
+                        'at' => $token,
                 )),
                 CURLOPT_RETURNTRANSFER => TRUE,
                 CURLOPT_HEADER => FALSE,
-                // might have problems if this is true, false less secure
                 CURLOPT_SSL_VERIFYPEER => FALSE,
                 CURLOPT_CAINFO => 'cacert.pem',
         ));
 
-        // get response, response code
-        $curlResponse = curl_exec($curlRequest);
-        $status   = curl_getinfo($curlRequest, CURLINFO_HTTP_CODE);
-        // close connection
-        curl_close($curlRequest);
+        // Execute request and get response and status code
+        $response = curl_exec($request);
+        $status   = curl_getinfo($request, CURLINFO_HTTP_CODE);
 
-        // check responses,
-        // GOOD:
-        // response codes: anything in the 2xx 200-206 (I think it only sends 200 on success)
-        // starts with 'SUCCESS'
-        if($status == 200 AND strpos($curlResponse, 'SUCCESS') === 0)
+        // Close connection
+        curl_close($request);
+
+        // Validate response
+        if($status == 200 AND strpos($response, 'SUCCESS') === 0)
         {
-                // get rid of success
-                $curlResponse = substr($curlResponse, 7);
-                // decode in case of special chars
-                $curlResponse = urldecode($curlResponse);
-                // make associative array
-                preg_match_all('/^([^=\r\n]++)=(.*+)/m', $curlResponse, $m, PREG_PATTERN_ORDER);
-                $curlResponse = array_combine($m[1], $m[2]);
-                // keysort to keep in order
-                ksort($curlResponse);
-                return $curlResponse;
+                // Remove SUCCESS part (7 characters long)
+                $response = substr($response, 7);
+				
+                // Urldecode it
+                $response = urldecode($response);
+
+                // Turn it into associative array
+                preg_match_all('/^([^=\r\n]++)=(.*+)/m', $response, $m, PREG_PATTERN_ORDER);
+                $response = array_combine($m[1], $m[2]);
+
+                // Fix character encoding if needed
+                if(isset($response['charset']) AND strtoupper($response['charset']) !== 'UTF-8')
+                {
+                        foreach($response as $key => &$value)
+                        {
+                                $value = mb_convert_encoding($value, 'UTF-8', $response['charset']);
+                        }
+
+                        $response['charset_original'] = $response['charset'];
+                        $response['charset'] = 'UTF-8';
+                }
+				
+                // Sort on keys
+                ksort($response);
+
+                // Done!
+                return $response;
         }
-        return 'error, response code ' . $status;
+		else
+		{
+			return FALSE;
+		}
+        return FALSE;
 }
+?>
