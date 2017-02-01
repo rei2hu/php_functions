@@ -68,6 +68,7 @@ local files = {}
 local current_depth = 0
 local path = {}
 local seen = {}
+local files = {}
 
 while file:read(0) do
 	local offsetChunk, timestampChunk, zSizeChunk, sizeChunk, reservedChunk, idChunk, nameChunk = string.unpack("i8i8iiiiz", file:read(96))
@@ -97,14 +98,41 @@ while file:read(0) do
 			current_depth = current_depth + 1
 			table.insert(path, current_depth, nameChunk) -- if current depth is 0, insert at 1, if current depth is 1, 2 etc
 			seen[idChunk] = current_depth 
+			-- print(nameChunk, idChunk)
+			-- print("\t" .. table.concat(path, "\\", 1, current_depth))
 		else
 			-- print(idChunk, nameChunk, "", "", seen[idChunk])
+			-- print(nameChunk, idChunk)
 			table.insert(path, seen[idChunk], nameChunk)
 			current_depth = seen[idChunk]
 		end
 	else
-		print(table.concat(path, "\\", 1, current_depth) .. "\\"  .. nameChunk)
+		table.insert(files, {offsetChunk, zSizeChunk, sizeChunk, table.concat(path, "\\", 1, current_depth) .. "\\" .. nameChunk})
 	end
+end
+
+table.sort(files, function(a, b) return a[1] < b[1] end)
+
+print(string.format("%-8s", "offset"), 
+	string.format("%-8s", "expect"),
+	string.format("%-8s", "comp"), 
+	string.format("%-8s", "real"), 
+	string.format("%-8s","path"))
+
+
+local expected_offset = 0
+
+for k, v in pairs(files) do
+	local msg = ""
+	if (expected_offset ~= v[1]) then
+		msg = expected_offset - v[1]
+	end
+	print(string.format("%-8s", v[1]), 
+		string.format("%-8s", msg),
+		string.format("%-8s", v[2]), 
+		string.format("%-8s", v[3]), 
+		string.format("%-8s", v[4]))
+	expected_offset = v[1] + v[2]
 end
 
 file:close()
