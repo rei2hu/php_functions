@@ -13,8 +13,6 @@ local output
 local quiet
 local verbose
 
-local outFile = io.open("filetowrite.txt", "wb")
-
 for k,v in ipairs(arg) do
 	if not fileName then fileName = string.match(v, ".*toc") end
 	if v == "-x" then extract = true end
@@ -109,5 +107,4 @@ while file:read(0) do
 	end
 end
 
-outFile:close()
 file:close()
