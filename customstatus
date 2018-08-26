@@ -1,0 +1,63 @@
+#!/bin/bash
+
+# reference: https://i3wm.org/docs/i3bar-protocol.html
+
+# send version
+echo '{ "version": 1 }'
+
+# send endless array
+echo '['
+
+# so we can end things with commas I guess
+echo '[]'
+
+GOOD_COLOR="#00FF00"
+OK_COLOR="#FFFF00"
+BAD_COLOR="FF0000"
+
+while :
+do
+    CONTENT="["
+
+    ### get brightness info
+    BRIGHTNESS=$(brightnessctl | sed -rn 's/^.*\((.*?)\).*$/\1/p')
+
+    CONTENT+="{\"full_text\":\"💡 $BRIGHTNESS\"}"
+    ### end brightness info
+
+    ### get volume info (yes its only one side but should be ok)
+    VOLUME=$(awk -F"[][]" '/%/ { print $2 }' <(amixer sget Master) | head -n 1)
+    # check if muted
+    VOL_ICON="🔊"
+    if [[ $(amixer sget Master) == *"[off]"* ]]; then
+        VOL_ICON="🔇"
+    fi
+
+    CONTENT+=",{\"full_text\":\"$VOL_ICON $VOLUME\"}"
+    ### end volume info
+
+    ### get battery info, first line, get percentage
+    BATTERY=$(acpi -b | head -n 1 | sed -rn 's/^.*, (.*?)%.*$/\1/p')
+    OUTOF10=$(($BATTERY/10))
+    if [[ $OUTOF10 -gt 6 ]]; then
+        COLOR=$GOOD_COLOR
+    elif [[ $OUTOF10 -gt 3 ]]; then
+        COLOR=$OK_COLOR
+    else
+        COLOR=$BAD_COLOR
+    fi
+    BATTERY_FILL=$(printf '▮%.0s' $(seq 1 $OUTOF10))
+    BATTERY_EMPTY=$(printf '▯%.0s' $(seq 1 $((10 - $OUTOF10))))
+    BATTERY="$BATTERY_FILL$BATTERY_EMPTY"
+
+    CONTENT+=",{\"full_text\":\"🔋 $BATTERY\", \"color\":\"$COLOR\"}"
+    ### end battery info
+
+    ### start date info
+    CONTENT+=",{\"full_text\":\"$(date '+%a %b %d, %Y %X')\"}"
+
+    CONTENT+="]"
+    echo "$CONTENT"
+    # echo -e "$CONTENT"
+    sleep 10
+done
