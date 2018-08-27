@@ -38,19 +38,24 @@ do
 
     ### get battery info, first line, get percentage
     BATTERY=$(acpi -b | head -n 1 | sed -rn 's/^.*, (.*?)%.*$/\1/p')
-    OUTOF10=$(($BATTERY/10))
-    if [[ $OUTOF10 -gt 6 ]]; then
-        COLOR=$GOOD_COLOR
-    elif [[ $OUTOF10 -gt 3 ]]; then
-        COLOR=$OK_COLOR
-    else
-        COLOR=$BAD_COLOR
-    fi
-    BATTERY_FILL=$(printf '▮%.0s' $(seq 1 $OUTOF10))
-    BATTERY_EMPTY=$(printf '▯%.0s' $(seq 1 $((10 - $OUTOF10))))
+    MULT=18
+    OUTOF10=$(bc -l <<< "$BATTERY/10")
+    NUM_OPEN_BASE=$(printf %.f $(bc -l <<< "10-$OUTOF10"))
+    NUM_SOLID_BASE=$(printf %.f $(bc -l <<< "$OUTOF10"))
+    G=$(printf %02X $(( NUM_SOLID_BASE < 5 ? NUM_SOLID_BASE*50 : 255 )))
+    R=$(printf %02X $(( NUM_OPEN_BASE < 5 ? NUM_OPEN_BASE*50 : 255 )))
+    # if [[ $OUTOF10 -gt 6 ]]; then
+    #     COLOR=$GOOD_COLOR
+    # elif [[ $OUTOF10 -gt 3 ]]; then
+    #     COLOR=$OK_COLOR
+    # else
+    #     COLOR=$BAD_COLOR
+    # fi
+    BATTERY_FILL=$(printf '▮%.0s' $(seq 1 $(bc -l <<< "$OUTOF10*$MULT")))
+    BATTERY_EMPTY=$(printf '▯%.0s' $(seq 1 $(bc -l <<< "(10-$OUTOF10)*$MULT")))
     BATTERY="$BATTERY_FILL$BATTERY_EMPTY"
 
-    CONTENT+=",{\"full_text\":\"🔋 $BATTERY\", \"color\":\"$COLOR\"}"
+    CONTENT+=",{\"full_text\":\"🔋 $BATTERY\", \"color\":\"${R}${G}00\"}"
     ### end battery info
 
     ### start date info
