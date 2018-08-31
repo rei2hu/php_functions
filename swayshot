@@ -1,0 +1,17 @@
+#!/bin/bash
+
+DATA=$(slurp | grim -g - - | ieditor | curl --request POST \
+	--url https://api.imgur.com/3/image \
+	--header 'Authorization: Bearer nah' \
+	--form image=@-)
+LINK=$(echo $DATA | jshon -e data -e link -u)
+
+if [ ! $LINK == "" ]; then
+	swaynag -m "Took screenshot ($LINK)" -b 'View in browser' "firefox $LINK" \
+		--background 099C00 \
+		--button-background 055500 \
+		--border 088c00
+else
+	echo $DATA
+	swaynag -m "Failed to take screenshot. Error $(echo $DATA | jshon -e data -e error -e message -u)"
+fi
