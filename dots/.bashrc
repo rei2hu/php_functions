@@ -1,7 +1,7 @@
 COLOR1='28'
 COLOR2='22'
 COLOR3='240'
-USER='\[\e[48;5;${COLOR1}m\]\[\e[30m\] ðŸ–³  \u'
+USER='\[\e[48;5;${COLOR1}m\]\[\e[30m\] 🖳  \u'
 JOBS='[\j]'
 # JOBS='@'
 HOST='\h '
@@ -28,7 +28,7 @@ limit_dir() {
 		fi
 }
 
-DIR='\[\e[48;5;${COLOR2}m\]\[\e[38;5;${COLOR1}m\]î‚° \[\e[30m\]ðŸ—  $(limit_dir) '
+DIR='\[\e[48;5;${COLOR2}m\]\[\e[38;5;${COLOR1}m\] \[\e[30m\]🗁  $(limit_dir) '
 
 git_status() {
     local hash=$(git log --pretty=format:'%h' -n 1 2> /dev/null)
@@ -44,7 +44,7 @@ git_status() {
         # how many files are staged
         local added_changes=$(git diff --cached --name-only 2> /dev/null | wc -l)
 
-        content=" î‚  $(basename `git rev-parse --show-toplevel` 2> /dev/null)/$(__git_ps1 "%s") "
+        content="  $(basename `git rev-parse --show-toplevel` 2> /dev/null)/$(__git_ps1 "%s") "
         content+="(${hash}) "
         if [ ! "0$behind" -eq 0 ]; then
             content+="${behind}-"
@@ -57,7 +57,7 @@ git_status() {
         fi
 
         if [ ! "0$total_changes" -eq 0 ]; then
-            content+=" î‚± ($added_changes/$((total_changes-added_changes)))"
+            content+="  ($added_changes/$((total_changes-added_changes)))"
         fi
         # if untracked file, put asterisk
         if [ ! $(git ls-files --others --exclude-standard 2>/dev/null | sed q1) == "" ]; then
@@ -67,7 +67,7 @@ git_status() {
     echo -e $content
 }
 
-GIT='\[\e[48;5;${COLOR3}m\]\[\e[38;5;${COLOR2}m\]î‚° \[\e[30m\]$(git_status) '
-END='\[\e[m\]\[\e[38;5;${COLOR3}m\]î‚°\[\e[m\] '
+GIT='\[\e[48;5;${COLOR3}m\]\[\e[38;5;${COLOR2}m\] \[\e[30m\]$(git_status) '
+END='\[\e[m\]\[\e[38;5;${COLOR3}m\]\[\e[m\] '
 
 export PS1=$USER$JOBS$HOST$DIR$GIT$END
