@@ -53,7 +53,6 @@ int main() {
 				half = (l + r) / 2;
 			}
 			i = l + 1;
-			std::cout << i << l << half << r << std::endl;
 			// [1, 2, 2.5, 3, 4.75, 6.5, 8.25, 10, 7.5, 6.25, 5]
 			// fill in using formula
 			for (; i <= half; i++) {
