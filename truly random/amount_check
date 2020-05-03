@@ -1,0 +1,34 @@
+<?php
+
+/**
+ * Checks stock of codes
+ * @param $database      the database that will be searched
+ * @param $codetype      the type of code (table) that will be searched
+ * @param $mysql         the mysql connection
+ * @return returns the amount of codes of the $codetype in the $database
+ */
+
+function stock_check($database, $codetype, $mysql)
+{
+
+	// initialize stock at 0
+	$stock = 0;
+
+	// choose database
+	$db = mysql_select_db($database, $mysql);
+	if ( !$db ){
+		//
+	}
+
+	$result = mysql_query( "SELECT * FROM `" . $codetype . "` WHERE `id` LIKE ''" );
+		
+	//for every row with no transaction id but with code, stock is increased by 1
+	while($row = mysql_fetch_array($result))
+	{
+		$stock++;
+	}
+
+	return $stock;
+}
+
+?>

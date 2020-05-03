@@ -1,0 +1,31 @@
+{
+    "workbench.colorTheme": "Gruvbox Material Dark",
+    "editor.renderWhitespace": "boundary",
+    "gruvboxMaterial.darkWorkbench": "high-contrast",
+    "editor.fontFamily": "Fira Code",
+    "editor.fontLigatures": true,
+    "editor.wordWrap": "bounded",
+    "editor.autoClosingOvertype": "never",
+    "window.openFilesInNewWindow": "on",
+    "editor.fontSize": 12,
+    "vim.hlsearch": true,
+    "vim.startInInsertMode": true,
+    "vim.statusBarColorControl": true,
+    "workbench.colorCustomizations": {
+        "statusBar.background": "#005f5f",
+        "statusBar.noFolderBackground": "#005f5f",
+        "statusBar.debuggingBackground": "#005f5f"
+    },
+    "vim.useCtrlKeys": false,
+    "vim.useSystemClipboard": true,
+    "gitlens.hovers.currentLine.over": "line",
+    "gitlens.currentLine.format": "${author} - ${message} . ${agoOrDate}",
+    "gitlens.codeLens.authors.enabled": false,
+    "gitlens.codeLens.scopes": [
+        "blocks",
+        "containers",
+        "document"
+    ],
+    "gitlens.statusBar.enabled": false,
+    "gitlens.hovers.avatars": false
+}
