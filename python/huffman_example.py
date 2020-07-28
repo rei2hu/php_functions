@@ -69,40 +69,40 @@ def decode_encoded(root, tree, encoded):
         return decode_encoded(root, tree.left, encoded)
 
 
-data = "AAAACABBDDECCDD"
-# string representation of the bits
-unencoded = ''.join(format(ord(c), 'b').zfill(8) for c in data)
-unencoded_length = len(unencoded)
+if __name__ == "__main__":
+    data = "AAAACABBDDECCDD"
+    # string representation of the bits
+    unencoded = ''.join(format(ord(c), 'b').zfill(8) for c in data)
 
-# "fun" way to get char counts
-symbols = list(
-    map(lambda a: Node(None, None, a[0], len(list(a[1]))), groupby(sorted(data))))
-symbols.sort(key=lambda s: s.occurrences)
+    # "fun" way to get char counts
+    symbols = list(
+        map(lambda a: Node(None, None, a[0], len(list(a[1]))), groupby(sorted(data))))
+    symbols.sort(key=lambda s: s.occurrences)
 
-# make the tree
-tree = make_huff_tree(symbols)
-# make the codebook
-codebook = generate_code_book(tree)
-# replace symbols with codewords
-encoded = ''.join(map(lambda c: codebook[c], data))
+    # make the tree
+    tree = make_huff_tree(symbols)
+    # make the codebook
+    codebook = generate_code_book(tree)
+    # replace symbols with codewords
+    encoded = ''.join(map(lambda c: codebook[c], data))
 
-# generate the tree representation
-enc_tree = encode_huff_tree(tree)
-# prepend to the encoded data
-encoded = ''.join(enc_tree) + encoded
-encoded_length = len(encoded)
+    # generate the tree representation
+    enc_tree = encode_huff_tree(tree)
+    # prepend to the encoded data
+    encoded = ''.join(enc_tree) + encoded
 
-# now let's unencode it!
-to_be_decoded = list(encoded)
-decoded_tree = decode_huff_tree(to_be_decoded)
-decoded = ''.join(decode_encoded(decoded_tree, decoded_tree, to_be_decoded))
+    # now let's decode it!
+    to_be_decoded = list(encoded)
+    # this eats just enough bits to build the tree, leaving the data
+    decoded_tree = decode_huff_tree(to_be_decoded)
+    decoded = ''.join(decode_encoded(decoded_tree, decoded_tree, to_be_decoded))
 
-print(f"""\
-Unencoded Length: {len(unencoded)}
-Unencoded: {unencoded}
-Encoded Length: {len(encoded)}
-Encoded: {encoded}
+    print(f"""\
+    Unencoded Length: {len(unencoded)}
+    Unencoded: {unencoded}
+    Encoded Length: {len(encoded)}
+    Encoded: {encoded}
 
-Data: {data}
-Decoded: {decoded}
-""")
+    Data: {data}
+    Decoded: {decoded}
+    """)
